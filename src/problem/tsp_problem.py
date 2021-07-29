@@ -1,6 +1,7 @@
 
 
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 
 from src.problem.problem_interface import ProblemInterface
@@ -47,15 +48,14 @@ class TSPProblem(ProblemInterface):
         # tratamento por causa que a passagem eh por parametro no python
         individual = np.copy(individual)
 
-        #obtem aleatoriamente a quantidade de vezes que sera feita a mutacao
+        # obtem aleatoriamente a quantidade de vezes que sera feita a mutacao
         n_changes = np.random.randint(1, 3)
 
         for i in range(n_changes):
             # obtem posicoes aleatorias do vetor para realizar a troca de posicoes
-            i1 = np.random.randint(0, len(individual))
-            i2 = np.random.randint(0, len(individual))
+            pos = random.sample(range(0, len(individual)), 2)
             # troca os elementos
-            individual[i1], individual[i2] = individual[i2], individual[i1]
+            individual[pos[0]], individual[pos[1]] = individual[pos[1]], individual[pos[0]]
 
         return individual
 
@@ -89,15 +89,13 @@ class TSPProblem(ProblemInterface):
         c2 = np.zeros((len(p2), ), dtype=np.int)
 
         # gera pivos aleatorios para fazer o corte
-        i1, i2 = np.random.randint(1, len(p1)-2, size=(2))
+        pos = random.sample(range(1, len(p1)-2), 2)
+        i1, i2 = pos[0], pos[1]
 
         # verifica se os pivos sao validos
-        # o i2 tem que ser MAIOR que o i1 
-        # caso for igual adiciona 1
+        # o i2 tem que ser MAIOR que o i1
         if(i1 > i2):
             i1, i2 = i2, i1
-        elif(i1 == i2):
-            i2 += 1
 
         # faz a troca de valores que estao entre os pivos do pai1 com o pai2
         for i in range(i1, i2):
@@ -116,19 +114,19 @@ class TSPProblem(ProblemInterface):
     def plot(self, individual):
         x, y = [], []
 
+        x.append(self.cities[0][0])
+        y.append(self.cities[0][1])
+        
+        for i in range(0, len(individual)):
+            x.append(self.cities[individual[i]][0])
+            y.append(self.cities[individual[i]][1])
+        
+        x.append(self.cities[0][0])
+        y.append(self.cities[0][1])
+
         # plt.ion()
         # plt.show()
         
-        # x.append(self.cities[0][0])
-        # y.append(self.cities[0][1])
-        
-        # for i in range(0, len(individual)):
-        #     x.append(self.cities[individual[i]][0])
-        #     y.append(self.cities[individual[i]][1])
-        
-        # x.append(self.cities[0][0])
-        # y.append(self.cities[0][1])
-
         # # limpa grafico antetior
         # plt.cla()
 
