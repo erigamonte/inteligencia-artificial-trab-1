@@ -33,7 +33,7 @@ def read_command_line_args():
     parser = argparse.ArgumentParser(
         description='Optimization with genetic algorithms.')
 
-    parser.add_argument('-p', '--problem', default='tsp',
+    parser.add_argument('-p', '--problem', default='classification',
                         choices=["classification", "regression", "tsp"])
     parser.add_argument('-n', '--n_generations', type=int,
                         default=1000, help='number of generations.')
@@ -51,22 +51,25 @@ def main():
 
     problem = build_problem(args.problem)
 
-    output_best_fitness, output_bests_fitness_generation, output_time = [], [], []
+    output_best_solution, output_best_fitness, output_bests_fitness_generation, output_time = [], [], [], []
 
     for _ in range(5):
-        bf, bfg, t = [], [], -1
+        bs, bfg, t = [], [], -1
 
-        bf, bfg, t = genetic_algorithm(
+        bs, bf, bfg, t = genetic_algorithm(
             problem,
             population_size=args.population_size,
             n_generations=args.n_generations,
             mutation_rate=args.mutation_rate)
 
+        output_best_solution.append(bs)
         output_best_fitness.append(bf)
         output_bests_fitness_generation.append(bfg)
         output_time.append(t)
 
     generate_report(output_best_fitness, output_bests_fitness_generation, output_time)
+
+    print('best solutions: ' + str(output_best_solution))
 
     print("OK!")
 

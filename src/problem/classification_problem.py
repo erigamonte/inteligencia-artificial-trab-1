@@ -1,5 +1,6 @@
 
 import numpy as np
+import copy
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from src.problem.problem_interface import ProblemInterface
@@ -39,22 +40,23 @@ class ClassificationProblem(ProblemInterface):
         self.metrics = ["euclidean", "hamming", "canberra", "braycurtis"]
 
     def new_individual(self):
-        ###################################
-        # TODO
-        ###################################
-        individual = None
+        individual = [np.random.randint(0, 2) for _ in range(0, len(self.X_train[0]))]
+        ks_pos = np.random.randint(0, len(self.Ks))
+        metrics_pos = np.random.randint(0, len(self.metrics))
+        
+        individual.append(self.Ks[ks_pos])
+        individual.append(self.metrics[metrics_pos])
+
         return individual
 
     def fitness(self, individual):
-        ###################################
-        # TODO
-        ###################################
-        binary_pattern = []
-        K = 0
-        metric = ""
+
+        binary_pattern = individual[:-2]
+        K = individual[-2]
+        metric = individual[-1]
 
         # return the indices of the features that are not zero.
-        indices = np.nonzero(individual)
+        indices = np.nonzero(binary_pattern)
 
         # check if there is at least one feature available
         if len(indices) == 0:
@@ -64,12 +66,18 @@ class ClassificationProblem(ProblemInterface):
         x_tr = self.X_train[:, indices]
         x_val = self.X_val[:, indices]
 
+        x_tr_nsamples, x_tr_nx, x_tr_ny = x_tr.shape
+        x_tr_2 = x_tr.reshape((x_tr_nsamples,x_tr_nx*x_tr_ny))
+
+        x_val_nsamples, x_val_nx, x_val_ny = x_val.shape
+        x_val_2 = x_val.reshape((x_val_nsamples,x_val_nx*x_val_ny))
+
         # build the classifier
         knn = KNeighborsClassifier(n_neighbors=K, metric=metric)
         # train
-        knn = knn.fit(x_tr, self.y_train)
+        knn = knn.fit(x_tr_2, self.y_train)
         # predict the classes for the validation set
-        y_pred = knn.predict(x_val)
+        y_pred = knn.predict(x_val_2)
         # measure the accuracy
         acc = np.mean(y_pred == self.y_val)
 
@@ -80,16 +88,45 @@ class ClassificationProblem(ProblemInterface):
         return fitness
 
     def mutation(self, individual):
-        ###################################
-        # TODO
-        ###################################
+        # tratamento por causa que a passagem eh por parametro no python
+        individual = copy.deepcopy(individual)
+        
+        # em 50% dos casos altera os valores binarios, nos outros 50% faz a mutacao dos hyperparametros
+        if(np.random.uniform(0,1) > 0.5):
+            # obtem uma posicao aleatoria do vetor para realizar a mutacao
+            pos = np.random.randint(0, len(individual)-2)
+            individual[pos] = 0 if individual[pos] == 1 else 1
+        else:
+            pos = np.random.randint(1, 2)
+            if(pos == 1):
+                metrics_pos = np.random.randint(0, len(self.metrics))
+                individual[-pos] = self.metrics[metrics_pos]
+            else:
+                ks_pos = np.random.randint(0, len(self.Ks))
+                individual[-pos] = self.Ks[ks_pos]
+            
         return individual
 
     def crossover(self, p1, p2):
-        ###################################
-        # TODO
-        ###################################
-        return p1, p2
+        c1, c2 = [], [] 
+
+        # 1 a len(p1)-2 para desconsiderar as posicoes do hyperparam e ter pelo menos um ponto de troca
+        single_point_pos = np.random.randint(1, len(p1)-2)
+
+        for i in range(len(p1)-2):
+            if(i < single_point_pos):
+                c1.append(p1[i])
+                c2.append(p2[i])
+            else:
+                c1.append(p2[i])
+                c2.append(p1[i])
+
+        c1.append(p1[-2])
+        c1.append(p2[-1])
+        c2.append(p2[-2])
+        c2.append(p1[-1])
+
+        return c1, c2
 
     def plot(self, individual):
         pass

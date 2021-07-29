@@ -6,8 +6,8 @@ import time
 from pandas._libs.hashtable import value_count
 
 class Individual:
-    def __init__(self, value, fitness):
-        self.value = value
+    def __init__(self, solution, fitness):
+        self.solution = solution
         self.fitness = fitness  
 
 def genetic_algorithm(problem, population_size, n_generations, mutation_rate):
@@ -28,7 +28,7 @@ def genetic_algorithm(problem, population_size, n_generations, mutation_rate):
             # print('p1: ' + str(p1) + ' fitness: ' + str(problem.fitness(p1)))
             # print('p2: ' + str(p2) + ' fitness: ' + str(problem.fitness(p2)))
             
-            c1, c2 = problem.crossover(p1.value, p2.value)
+            c1, c2 = problem.crossover(p1.solution, p2.solution)
 
             # print('c1: ' + str(c1) + ' fitness: ' + str(problem.fitness(c1)))
             # print('c2: ' + str(c2) + ' fitness: ' + str(problem.fitness(c2)))
@@ -59,19 +59,19 @@ def genetic_algorithm(problem, population_size, n_generations, mutation_rate):
         # altera a populacao pela nova populacao
         population = new_population
 
-        problem.plot(best_individual.value)
+        problem.plot(best_individual.solution)
 
         print("iteration: " + str(n) + ' bestfitness_gen: ' + str(best_individual_new_pop.fitness) + ' bestfitness: ' + str(best_individual.fitness))
 
     t_end = time.time()
 
-    return best_individual.fitness, bests_fitness_generation, t_end-t_begin
+    return best_individual.solution, best_individual.fitness, bests_fitness_generation, t_end-t_begin
 
 def create_new_population(problem, population_size):
     new_population = []
     for i in range(population_size):
-        ind_value = problem.new_individual()
-        new_population.append(Individual(ind_value, problem.fitness(ind_value)))
+        ind_solution = problem.new_individual()
+        new_population.append(Individual(ind_solution, problem.fitness(ind_solution)))
     return new_population
 
 def population_fitness(population):
@@ -79,29 +79,41 @@ def population_fitness(population):
 
     for i in range(1, len(population)):
         if(best_individual.fitness > population[i].fitness):
+            # guarda uma copia profunda para nao ter perigo de em algum outro lugar ser modificado
             best_individual = copy.deepcopy(population[i])
     
     return best_individual
 
 def tournament_selection(population):
     # obtem posicoes aleatorias dos pais
-    values = random.sample(range(0, len(population)), 2)
-    if(population[values[0]].fitness < population[values[1]].fitness):
-        return population[values[0]]
-    return population[values[1]]
+    solutions = random.sample(range(0, len(population)), 2)
+    if(population[solutions[0]].fitness < population[solutions[1]].fitness):
+        return population[solutions[0]]
+    return population[solutions[1]]
 
 def proportionate_selection(population):
-    min = np.min([p.fitness for p in population])
-    #TODO somar o menor valor negativo caso existir
+    fitness = [p.fitness for p in population]
+    min = np.min(fitness)
 
-    max = np.max([p.fitness for p in population])
+    # tratamento para caso a fitness seja negativa
+    # busca o menor valor negativo e soma todos os valores com o oposto deste valor
+    if(min < 0):
+        for i in range(0,len(fitness)):
+            fitness[i] = fitness[i] + min * (-1)
+
+    max = np.max(fitness)
     
     total = 0
-    total = sum(max-p.fitness for p in population)
+    # como a avaliacao do fitness deve ser o melhor valor sendo o menor
+    # eh necessario verificar a diferenca do max com o valor do fitness
+    total = sum(max - f for f in fitness)
    
     pick = random.uniform(0, total)
     current = 0
-    for p in population:
-        current += max - p.fitness
+    for i in range(0, len(fitness)):
+        current += max - fitness[i]
         if current >= pick:
-            return p
+            break
+
+    return population[i]
+

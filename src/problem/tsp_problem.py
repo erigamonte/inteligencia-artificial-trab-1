@@ -127,7 +127,7 @@ class TSPProblem(ProblemInterface):
         # plt.ion()
         # plt.show()
         
-        # # limpa grafico antetior
+        # # limpa grafico anterior
         # plt.cla()
 
         # # informa novos pontos a serem desenhados
