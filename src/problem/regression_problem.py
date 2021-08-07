@@ -88,26 +88,26 @@ class RegressionProblem(ProblemInterface):
 
         x_points, y_points = [], []
         
-        # for i in range(0, len(self.points)):
-        #     x_points.append(self.points[i][0])
-        #     y_points.append(self.points[i][1])
+        for i in range(0, len(self.points)):
+            x_points.append(self.points[i][0])
+            y_points.append(self.points[i][1])
 
-        # x = np.linspace(np.min(x_points), np.max(x_points), num=100)
-        # y = []
-        # for i in range(0, len(x)):
-        #     y.append(self.function_fx(individual, x[i]))
+        x = np.linspace(np.min(x_points), np.max(x_points), num=100)
+        y = []
+        for i in range(0, len(x)):
+            y.append(self.function_fx(individual, x[i]))
         
-        # plt.ion()
-        # plt.show()
+        plt.ion()
+        plt.show()
         
-        # # limpa grafico anterior
-        # plt.cla()
+        # limpa grafico anterior
+        plt.cla()
 
-        # # informa novos pontos a serem desenhados
-        # plt.plot(x_points, y_points, "or")
+        # informa novos pontos a serem desenhados
+        plt.plot(x_points, y_points, "or")
 
-        # plt.plot(x, y, "-b")
+        plt.plot(x, y, "-b")
 
-        # #desenha o grafico
-        # plt.draw()
-        # plt.pause(0.000001)
+        #desenha o grafico
+        plt.draw()
+        plt.pause(0.000001)

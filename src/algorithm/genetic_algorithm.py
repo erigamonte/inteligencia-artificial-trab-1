@@ -1,14 +1,14 @@
 import numpy as np
+import pandas as pd
 import random
 import copy
 import time
-
-from pandas._libs.hashtable import value_count
+import matplotlib.pyplot as plt
 
 class Individual:
     def __init__(self, solution, fitness):
         self.solution = solution
-        self.fitness = fitness  
+        self.fitness = fitness
 
 def genetic_algorithm(problem, population_size, n_generations, mutation_rate):
 
@@ -46,26 +46,70 @@ def genetic_algorithm(problem, population_size, n_generations, mutation_rate):
 
         best_individual_new_pop = population_fitness(new_population)
 
+        # guarda os melhores individuos de cada geracao
+        bests_fitness_generation.append(best_individual_new_pop.fitness)
+
+        # verifica se o melhor individuo é o melhor de todas as geracoes
         if(best_individual_new_pop.fitness < best_individual.fitness):
             best_individual = best_individual_new_pop
 
-        # substitui um individuo aleatorio pelo melhor da geracao anterior
-        change_pos = np.random.randint(0, len(new_population))
-        new_population[change_pos] = best_individual_prvl_generation
+        # aplica o elitismo
+        population = elitism(population, new_population, population_size)
 
-        # armazzena o melhor individuo da geracao atual para ser usado na proxima geracao
-        best_individual_prvl_generation = best_individual_new_pop
+        # SESSAO COMENTADA PARA O ELITISMO DE TROCA DO MELHOR DA GERACAO ANTERIOR POR UM ALEATORIO DA NOVA
+        # ALTEREI PARA OS MELHORES DE AMBAS GERACOES APOS SUGESTAO EM AULA
         
-        # altera a populacao pela nova populacao
-        population = new_population
+        ########### substitui um individuo aleatorio pelo melhor da geracao anterior
+        ########### change_pos = np.random.randint(0, len(new_population))
+        ########### new_population[change_pos] = best_individual_prvl_generation
 
-        problem.plot(best_individual.solution)
+        ########### # armazena o melhor individuo da geracao atual para ser usado na proxima geracao
+        ########### best_individual_prvl_generation = best_individual_new_pop
 
-        print("iteration: " + str(n) + ' bestfitness_gen: ' + str(best_individual_new_pop.fitness) + ' bestfitness: ' + str(best_individual.fitness))
+        ########### population = new_population
+
+        # print("iteration: " + str(n) + ' bestfitness_gen: ' + str(best_individual_new_pop.fitness) + ' bestfitness: ' + str(best_individual.fitness))
 
     t_end = time.time()
 
-    return best_individual.solution, best_individual.fitness, bests_fitness_generation, t_end-t_begin
+    return best_individual, bests_fitness_generation, t_end-t_begin
+
+def plot_best_solution(problem, output_bests_solution):
+    output_bests_solution.sort(key=lambda x: x.fitness)
+    for s in output_bests_solution:
+        print('Fitness: ' + str(s.fitness))
+        problem.plot(s.solution)
+
+def plot_history(bests_fitness_generation, n_generations):
+    for i in range(len(bests_fitness_generation)):
+        x = list(range(1, n_generations+1))
+        y = bests_fitness_generation[i]
+        plt.plot(x, y, "-b")
+
+    plt.ion()
+    plt.show()
+    #desenha o grafico
+    plt.draw()
+    plt.pause(0.000001)
+
+def generate_report(output_best_solutions, output_time):
+    output_best_fitness = [bs.fitness for bs in output_best_solutions]
+    df = pd.DataFrame({
+        'max': [np.max(output_best_fitness)],
+        'min': [np.min(output_best_fitness)],
+        'media': [np.mean(output_best_fitness)],
+        'd. padrao': [np.std(output_best_fitness)],
+        'tempo total (s)': [np.mean(output_time)]
+    })
+    print(df)
+
+def elitism(population, new_population, population_size):
+    # une a populacao anterior e a nova
+    elitism_population = population + new_population
+    # ordena por fitness
+    elitism_population.sort(key=lambda x: x.fitness)
+    #gera uma populacao com as melhores de ambas
+    return elitism_population[:population_size]
 
 def create_new_population(problem, population_size):
     new_population = []

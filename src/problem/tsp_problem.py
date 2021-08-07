@@ -124,17 +124,17 @@ class TSPProblem(ProblemInterface):
         x.append(self.cities[0][0])
         y.append(self.cities[0][1])
 
-        # plt.ion()
-        # plt.show()
+        plt.ion()
+        plt.show()
         
-        # # limpa grafico anterior
-        # plt.cla()
+        # limpa grafico anterior
+        plt.cla()
 
-        # # informa novos pontos a serem desenhados
-        # plt.plot(x, y, "-bo", markerfacecolor="r")
+        # informa novos pontos a serem desenhados
+        plt.plot(x, y, "-bo", markerfacecolor="r")
 
-        # #desenha o grafico
-        # plt.draw()
-        # plt.pause(0.000001)
+        #desenha o grafico
+        plt.draw()
+        plt.pause(0.000001)
 
         
