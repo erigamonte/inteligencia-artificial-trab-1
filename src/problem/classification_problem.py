@@ -56,7 +56,7 @@ class ClassificationProblem(ProblemInterface):
         metric = individual[-1]
 
         # return the indices of the features that are not zero.
-        indices = np.nonzero(binary_pattern)
+        indices = np.nonzero(binary_pattern)[0]
 
         # check if there is at least one feature available
         if len(indices) == 0:
@@ -66,18 +66,12 @@ class ClassificationProblem(ProblemInterface):
         x_tr = self.X_train[:, indices]
         x_val = self.X_val[:, indices]
 
-        x_tr_nsamples, x_tr_nx, x_tr_ny = x_tr.shape
-        x_tr_2 = x_tr.reshape((x_tr_nsamples,x_tr_nx*x_tr_ny))
-
-        x_val_nsamples, x_val_nx, x_val_ny = x_val.shape
-        x_val_2 = x_val.reshape((x_val_nsamples,x_val_nx*x_val_ny))
-
         # build the classifier
         knn = KNeighborsClassifier(n_neighbors=K, metric=metric)
         # train
-        knn = knn.fit(x_tr_2, self.y_train)
+        knn = knn.fit(x_tr, self.y_train)
         # predict the classes for the validation set
-        y_pred = knn.predict(x_val_2)
+        y_pred = knn.predict(x_val)
         # measure the accuracy
         acc = np.mean(y_pred == self.y_val)
 

@@ -44,22 +44,21 @@ def main():
     for _ in range(5):
         bs, bfg, t = [], [], -1
 
-        bs, bf, bfg, t = genetic_algorithm(
+        bs, bfg, t = genetic_algorithm(
             problem,
             population_size=args.population_size,
             n_generations=args.n_generations,
             mutation_rate=args.mutation_rate)
 
         output_best_solution.append(bs)
-        output_best_fitness.append(bf)
         output_bests_fitness_generation.append(bfg)
         output_time.append(t)
 
-    generate_report(output_best_fitness, output_bests_fitness_generation, output_time)
+    generate_report(output_best_solution, output_time)
 
     plot_history(output_bests_fitness_generation, args.n_generations)
 
-    print('best solutions: ' + str(output_best_solution))
+    print('best solutions: ' + str([o.solution for o in output_best_solution]))
 
     print("OK!")
 
